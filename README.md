@@ -24,6 +24,7 @@ This is a template for creating KernelSU/Apatch/Magisk modules with WebUI. It in
 - `banner.{png,webp}`: Banner which will be shown in module managers
   - [works in KSU-Next](https://github.com/KernelSU-Next/KernelSU-Next/blob/be141d05d03f37f67ae1505dbbe56cadbfcad130/manager/app/src/main/java/com/rifsxd/ksunext/ui/viewmodel/ModuleViewModel.kt#L48) and other new managers
   - you could place it inside `webroot/` to use as WebUI media
+  - recommended size is `640*320`
 - `update.json`: Will be generated from `module.prop`
 - `META-INF/` [From magisk docs](https://topjohnwu.github.io/Magisk/guides.html#magisk-module-installer)
 
@@ -40,5 +41,5 @@ TODO: link/mount guide `~/.local/share/waydroid/data/adb/modules/ksu-webui-modul
 
 ## Install
 
-- Download zip from **[latest release](./releases/latest)**
+- Download zip from **[latest release](https://github.com/barsikus007/ksu-webui-module-template/releases/latest)**
 - Flash via your module manager of choice

@@ -40,40 +40,39 @@
         repoUrl = pkgs.lib.removeSuffix "/releases/latest/download/update.json" moduleProp.updateJson;
 
         updateJson = {
-          version = moduleProp.version;
+          inherit (moduleProp) version;
           versionCode = builtins.fromJSON moduleProp.versionCode;
           zipUrl = "${repoUrl}/releases/latest/download/${moduleProp.id}_${moduleProp.version}.zip";
-          changelog = "${repoUrl}/CHANGELOG.md";
+          changelog = "${repoUrl}/releases/latest/download/CHANGELOG.md";
         };
       in
       {
-        packages = {
-          default = pkgs.stdenvNoCC.mkDerivation {
-            inherit (moduleProp) version;
-            pname = moduleProp.id;
+        packages.default = pkgs.stdenvNoCC.mkDerivation {
+          inherit (moduleProp) version;
+          pname = moduleProp.id;
 
-            src = self;
+          src = self;
 
-            nativeBuildInputs = with pkgs; [
-              zip
-              jq
-            ];
+          nativeBuildInputs = with pkgs; [
+            zip
+            jq
+          ];
 
-            # zip -r $out/${moduleProp.id}_minimal_${moduleProp.version}.zip ./* -x flake.{nix,lock} README.md CHANGELOG.md LICENSE "banner.*"
-            installPhase = ''
-              mkdir -p $out
+          # zip -r $out/${moduleProp.id}_minimal_${moduleProp.version}.zip ./* -x flake.{nix,lock} README.md CHANGELOG.md LICENSE "banner.*"
+          installPhase = ''
+            mkdir --parents $out
 
-              for f in banner.*; do
-                if [ -e "$f" ]; then
-                  echo "banner=$f" >> module.prop
-                  break
-                fi
-              done
-              zip -r $out/${moduleProp.id}_${moduleProp.version}.zip ./* -x flake.{nix,lock} {CHANGELOG,README}.md LICENSE
+            for f in banner.*; do
+              if [ -e "$f" ]; then
+                echo "banner=$f" >> module.prop
+                break
+              fi
+            done
+            zip -r $out/${moduleProp.id}_${moduleProp.version}.zip ./* --exclude flake.{nix,lock} {CHANGELOG,README}.md LICENSE
 
-              echo '${builtins.toJSON updateJson}' | jq . > $out/update.json
-            '';
-          };
+            echo '${builtins.toJSON updateJson}' | jq . > $out/update.json
+            cp CHANGELOG.md $out/
+          '';
         };
 
         devShells.default = pkgs.mkShellNoCC {

@@ -19,6 +19,7 @@ jobs:
         uses: actions/download-artifact@v7
         with:
           path: dist
+          merge-multiple: true
 
       - name: Release
         uses: softprops/action-gh-release@v2
