@@ -92,26 +92,53 @@
               adb shell su -c "rm -rf '$target_dir'"
               adb shell su -c "mv '/data/local/tmp/${moduleProp.id}' '$target_dir'"
             '')
-            # TODO: remake it to sync folder instead file
-            (writeShellScriptBin "sync_file" ''
-              filename=$1
-              basename=$(basename "$filename")
-              basedir=$(dirname "$filename")
-              target_dir=/data/adb/modules/${moduleProp.id}/$basedir
-              adb push "$filename" /data/local/tmp/"$basename"
-              adb shell su -c "mkdir -p '$target_dir'"
-              adb shell su -c "mv '/data/local/tmp/$basename' '$target_dir/'"
+            (writeShellScriptBin "sync_folder" ''
+              target=''${1:-module/webroot}
+              target=''${target%/}
+
+              if [ "$target" = "module" ] || [ "$target" = "." ]; then
+                relpath=""
+              elif [ "''${target#module/}" != "$target" ]; then
+                relpath="''${target#module/}"
+              else
+                relpath="$target"
+              fi
+
+              if [ -n "$relpath" ]; then
+                dest_path="/data/adb/modules/${moduleProp.id}/$relpath"
+              else
+                dest_path="/data/adb/modules/${moduleProp.id}"
+              fi
+
+              temp_dir="/data/local/tmp/${moduleProp.id}_sync"
+
+              if [ -d "$target" ]; then
+                adb shell "rm -rf '$temp_dir'"
+                adb shell "mkdir -p '$temp_dir'"
+                adb push "$target/." "$temp_dir"
+                adb shell su -c "mkdir -p '$(dirname "$dest_path")'"
+                adb shell su -c "rm -rf '$dest_path'"
+                adb shell su -c "mv '$temp_dir' '$dest_path'"
+              elif [ -f "$target" ]; then
+                basename=$(basename "$target")
+                adb push "$target" "/data/local/tmp/$basename"
+                adb shell su -c "mkdir -p '$(dirname "$dest_path")'"
+                adb shell su -c "mv '/data/local/tmp/$basename' '$dest_path'"
+              else
+                echo "Error: '$target' is not a valid file or directory" >&2
+                exit 1
+              fi
             '')
             (writeShellScriptBin "hotreload" ''
-              filename=$1
-              while inotifywait --event close_write "$filename"; do sync_file "$filename"; done
+              folder=''${1:-module/webroot}
+              while inotifywait --quiet --recursive --event close_write --event moved_to --event delete "$folder"; do sync_folder "$folder"; done
             '')
           ];
 
           shellHook = ''
             echo "🚀 KernelSU/Apatch/Magisk WebUI Module environment loaded!"
-            echo "💡 Run 'hotreload module/webroot/index.html' to watch for changes"
-            echo "💡 Run 'sync_file module/webroot/styles.css' to push manually"
+            echo "💡 Run 'hotreload <file or webroot by default>' to watch for changes"
+            echo "💡 Run 'sync_folder <file or webroot by default>' to push manually"
           '';
         };
       }

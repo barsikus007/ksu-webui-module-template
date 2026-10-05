@@ -34,10 +34,6 @@ This is a template for creating KernelSU/Apatch/Magisk modules with WebUI. It in
 
 Use `nix develop` (or better, use `direnv`) to enter a development shell with necessary tools installed:
 
-### Development inside Waydroid
-
-TODO: link/mount guide `~/.local/share/waydroid/data/adb/modules/ksu-webui-module-template`
-
 ## Install
 
 - Download zip from **[latest release](https://github.com/barsikus007/ksu-webui-module-template/releases/latest)**
