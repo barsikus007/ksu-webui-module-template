@@ -5,7 +5,7 @@ This is a template for creating KernelSU/Apatch/Magisk modules with WebUI. It in
 ## How to use template
 
 1. Fork this template
-2. Modify `module.prop` with your module details.
+2. Modify `module/module.prop` with your module details.
    1. Set your repo url in `updateJson`
 3. Develop you own module, lol
 4. Edit `CHANGELOG.md`
@@ -19,21 +19,20 @@ This is a template for creating KernelSU/Apatch/Magisk modules with WebUI. It in
   - [KernelSU](https://kernelsu.org/guide/module.html)
   - [Apatch](https://apatch.dev/apm-guide.html)
   - [Magisk](https://topjohnwu.github.io/Magisk/guides.html)
-- `module.prop`: Module metadata
+- `module/`: Module content
+  - `module.prop`: Module metadata
+  - `banner.{png,webp}`: Banner which will be shown in module managers
+    - [works in KSU-Next](https://github.com/KernelSU-Next/KernelSU-Next/blob/be141d05d03f37f67ae1505dbbe56cadbfcad130/manager/app/src/main/java/com/rifsxd/ksunext/ui/viewmodel/ModuleViewModel.kt#L48) and other new managers
+    - you could place it inside `webroot/` to use as WebUI media
+    - recommended size is `640*320`
+  - `webroot/`: WebUI assets
+  - `META-INF/` [From magisk docs](https://topjohnwu.github.io/Magisk/guides.html#magisk-module-installer)
 - `CHANGELOG.md`: Module changelog
-- `banner.{png,webp}`: Banner which will be shown in module managers
-  - [works in KSU-Next](https://github.com/KernelSU-Next/KernelSU-Next/blob/be141d05d03f37f67ae1505dbbe56cadbfcad130/manager/app/src/main/java/com/rifsxd/ksunext/ui/viewmodel/ModuleViewModel.kt#L48) and other new managers
-  - you could place it inside `webroot/` to use as WebUI media
-  - recommended size is `640*320`
 - `update.json`: Will be generated from `module.prop`
-- `META-INF/` [From magisk docs](https://topjohnwu.github.io/Magisk/guides.html#magisk-module-installer)
 
 ### Development with Nix
 
 Use `nix develop` (or better, use `direnv`) to enter a development shell with necessary tools installed:
-
-- "hotreload webroot/index.html" to watch for changes
-- "sync_file webroot/styles.css" to push manually
 
 ### Development inside Waydroid
 

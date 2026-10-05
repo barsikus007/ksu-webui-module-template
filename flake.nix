@@ -19,7 +19,7 @@
 
         moduleProp =
           let
-            content = builtins.readFile ./module.prop;
+            content = builtins.readFile ./module/module.prop;
             lines = pkgs.lib.splitString "\n" content;
             validLines = builtins.filter (l: l != "" && builtins.substring 0 1 l != "#") lines;
             parseLine =
@@ -62,13 +62,15 @@
           installPhase = ''
             mkdir --parents $out
 
+            cd module
             for f in banner.*; do
               if [ -e "$f" ]; then
                 echo "banner=$f" >> module.prop
                 break
               fi
             done
-            zip -r $out/${moduleProp.id}_${moduleProp.version}.zip ./* --exclude flake.{nix,lock} {CHANGELOG,README}.md LICENSE
+            zip -r $out/${moduleProp.id}_${moduleProp.version}.zip ./*
+            cd ..
 
             echo '${builtins.toJSON updateJson}' | jq . > $out/update.json
             cp CHANGELOG.md $out/
@@ -85,7 +87,7 @@
               temp_dir=/data/local/tmp/${moduleProp.id}
               adb shell "rm -rf $temp_dir"
               adb shell "mkdir -p $temp_dir"
-              adb push ./* "$temp_dir"
+              adb push module/* "$temp_dir"
               target_dir=/data/adb/modules/${moduleProp.id}
               adb shell su -c "rm -rf '$target_dir'"
               adb shell su -c "mv '/data/local/tmp/${moduleProp.id}' '$target_dir'"
@@ -102,14 +104,14 @@
             '')
             (writeShellScriptBin "hotreload" ''
               filename=$1
-              while inotifywait -e close_write "$filename"; do sync_file "$filename"; done
+              while inotifywait --event close_write "$filename"; do sync_file "$filename"; done
             '')
           ];
 
           shellHook = ''
             echo "🚀 KernelSU/Apatch/Magisk WebUI Module environment loaded!"
-            echo "💡 Run 'hotreload webroot/index.html' to watch for changes"
-            echo "💡 Run 'sync_file webroot/styles.css' to push manually"
+            echo "💡 Run 'hotreload module/webroot/index.html' to watch for changes"
+            echo "💡 Run 'sync_file module/webroot/styles.css' to push manually"
           '';
         };
       }
